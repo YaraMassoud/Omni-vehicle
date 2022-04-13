@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<xacro:include filename="$(find omni_vehicle)/urdf/omni_wheel/roller.urdf.xacro"/>
+
+	<xacro:property name="scaler" value="2"/>
+	
+	<xacro:property name="r" value="0.05"/>
+		
+	<xacro:property name="w" value="0.012"/>
+	
+	<xacro:property name="a" value="40"/>
+	
+	<xacro:property name="angle_rad" value="0.698132"/>
+	
+	<xacro:property name="angle_rad_h" value="0.349066"/>
+
+	<xacro:macro name="rim_macro" params="name color xyz rpy *gz_color">
+
+		<link name="rim_${name}_link">
+			<inertial>
+				<origin xyz="0 0 -0.000343"/>
+				<mass value="0.00835758"/>
+				<inertia
+					ixx="6.63684e-07"
+					ixy="0"
+					ixz="0"
+					iyy="6.63684e-07"
+					iyz="0"
+					izz="9.40333e-07"/>
+			</inertial>
+			<visual>
+				<geometry>
+					<cylinder radius="0.05" length="0.032"/>
+				</geometry>
+				<material name="rim_${name}_material">
+					<color rgba="${color} 1"/>
+				</material>
+			</visual>
+			<collision>
+				<geometry>
+					<cylinder radius="0.05" length="0.032"/>
+				</geometry>
+			</collision>
+		</link>
+		<joint	name="rim_${name}_joint" type="revolute">
+			<parent link="vehicle_base_link" />
+			<child link="rim_${name}_link" />
+			<axis xyz="0 0 1"/>
+			<origin xyz="${xyz}" rpy="${rpy}"/>
+			<limit effort="1000" velocity="3000" lower="-1e+30" upper="1e+30"/>
+		</joint>
+		
+		<gazebo reference="rim_${name}_link">
+			<xacro:insert_block name="gz_color"/>
+		</gazebo>
+
+		<xacro:roller_macro parent="${name}" name="e" xyz="${r*cos((2*pi)/9)} ${r*sin((2*pi)/9)} ${w}" rpy="-1.570796326794896 0 ${angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="ne" xyz="${r*cos((4*pi)/9)} ${r*sin((4*pi)/9)} ${w}" rpy="-1.570796326794896 0 ${2*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="n" xyz="${-r/2} ${(1.73205080757*r)/2} ${w}" rpy="-1.570796326794896 0 ${3*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="nw" xyz="${-r*cos(pi/9)} ${r*sin(pi/9)} ${w}" rpy="-1.570796326794896 0 ${4*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="w" xyz="${-r*cos(pi/9)} ${-r*sin(pi/9)} ${w}" rpy="-1.570796326794896 0 ${-4*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="sw" xyz="${-r/2} ${-(1.73205080757*r)/2} ${w}" rpy="-1.570796326794896 0 ${-3*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="s" xyz="${r*cos((4*pi)/9)} ${-r*sin((4*pi)/9)} ${w}" rpy="-1.570796326794896 0 ${7*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="se" xyz="${r*cos((2*pi)/9)} ${-r*sin((2*pi)/9)} ${w}" rpy="-1.570796326794896 0 ${-angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="see" xyz="${r} 0 ${w}" rpy="-1.570796326794896 0 0"/>
+		
+		
+		<xacro:roller_macro parent="${name}" name="e2" xyz="${r*cos((pi)/9)} ${r*sin((pi)/9)} ${-w}" rpy="-1.570796326794896 0 ${angle_rad_h}"/>
+		<xacro:roller_macro parent="${name}" name="ne2" xyz="${r/2} ${(1.73205080757*r)/2} ${-w}" rpy="-1.570796326794896 0 ${angle_rad_h+angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="n2" xyz="${-r*cos((4*pi)/9)} ${r*sin((4*pi)/9)} ${-w}" rpy="-1.570796326794896 0 ${angle_rad_h+2*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="nw2" xyz="${-r*cos((2*pi)/9)} ${r*sin(2*pi/9)} ${-w}" rpy="-1.570796326794896 0 ${angle_rad_h+3*angle_rad}"/>
+		<xacro:roller_macro parent="${name}" name="w2" xyz="${-r} 0 ${-w}" rpy="-1.570796326794896 0 ${-(angle_rad_h+4*angle_rad)}"/>
+		<xacro:roller_macro parent="${name}" name="sw2" xyz="${-r*cos((2*pi)/9)} ${-r*sin((2*pi)/9)} ${-w}" rpy="-1.570796326794896 0 ${-(angle_rad_h+3*angle_rad)}"/>
+		<xacro:roller_macro parent="${name}" name="s2" xyz="${-r*cos((4*pi)/9)} ${-r*sin((4*pi)/9)} ${-w}" rpy="-1.570796326794896 0 ${-(angle_rad_h+2*angle_rad)}"/>
+		<xacro:roller_macro parent="${name}" name="se2" xyz="${r/2} ${-(1.73205080757*r)/2} ${-w}" rpy="-1.570796326794896 0 ${-(angle_rad_h+angle_rad)}"/>
+		<xacro:roller_macro parent="${name}" name="see2" xyz="${r*cos(pi/9)} ${-r*sin(pi/9)} ${-w}" rpy="-1.570796326794896 0 ${-angle_rad_h}"/>
+		
+		<transmission name="rim_${name}_transmission">
+			<type>transmission_interface/SimpleTransmission</type>
+			<joint name="rim_${name}_joint">
+				<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+			</joint>
+			<actuator name="rim_${name}_motor">
+				<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+				<mechanicalReduction>1</mechanicalReduction>
+			</actuator>
+		</transmission>
+
+	</xacro:macro>
+
+</robot>
